@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.francaemp.estacionamentodio.dto.ParkingCreateDTO;
 import com.francaemp.estacionamentodio.entities.Parking;
 
 @Service
