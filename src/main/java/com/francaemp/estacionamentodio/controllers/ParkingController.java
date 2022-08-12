@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,5 +51,22 @@ public class ParkingController {
 		service.create(newParking);
 		var newParkingDTO = parkingMapper.parkingDTO(newParking);
 		return ResponseEntity.status(HttpStatus.CREATED).body(newParkingDTO);
+	}
+	
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<Void> deleteById(@PathVariable String id){
+		service.deleteById(id);
+		return ResponseEntity.ok().build();
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<ParkingDTO> update(@PathVariable String id, @RequestBody ParkingCreateDTO createDTO){
+		var parking = service.findById(id);
+		parking = parkingMapper.toParking(createDTO);
+		parking.setId(id);
+		service.update(parking);
+		var parkingDTO = parkingMapper.parkingDTO(parking);
+		return ResponseEntity.ok(parkingDTO);
+		
 	}
 }

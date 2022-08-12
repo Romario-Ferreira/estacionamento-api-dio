@@ -8,7 +8,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.francaemp.estacionamentodio.dto.ParkingCreateDTO;
 import com.francaemp.estacionamentodio.entities.Parking;
+import com.francaemp.estacionamentodio.exception.ParkingNotFoundException;
 
 @Service
 public class ParkingService {
@@ -30,7 +32,11 @@ public class ParkingService {
 	}
 
 	public Parking findById(String id) {
-		return parkingsMap.get(id);
+		Parking parking = parkingsMap.get(id);
+		if(parking == null) {
+			throw new ParkingNotFoundException(id);
+		}
+		return parking;
 	}
 
 	public void create(Parking newParking) {
@@ -38,5 +44,14 @@ public class ParkingService {
 		newParking.setId(id);
 		newParking.setEntryDate(LocalDateTime.now());
 		parkingsMap.put(id, newParking);	
+	}
+
+	public void deleteById(String id) {
+		var parking = findById(id);
+		parkingsMap.remove(id);
+	}
+
+	public Parking update(Parking parking) {	
+		return parkingsMap.put(parking.getId(), parking);
 	}
 }
