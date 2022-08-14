@@ -1,7 +1,9 @@
 package com.francaemp.estacionamentodio.controllers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,60 +15,58 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.francaemp.estacionamentodio.controllers.mapper.ParkingMapper;
-import com.francaemp.estacionamentodio.dto.ParkingCreateDTO;
 import com.francaemp.estacionamentodio.dto.ParkingDTO;
 import com.francaemp.estacionamentodio.entities.Parking;
+import com.francaemp.estacionamentodio.entities.TicketPayment;
 import com.francaemp.estacionamentodio.services.ParkingService;
+import com.francaemp.estacionamentodio.services.TicketService;
 
 @RestController
 @RequestMapping(value = "/parking")
 public class ParkingController {
 
-	private final ParkingService service;
+	@Autowired
+	private ParkingService service;
 	
-	private final ParkingMapper parkingMapper;
-	
-	public ParkingController(ParkingService service, ParkingMapper parkingMapper) {
-		this.service = service;
-		this.parkingMapper = parkingMapper;
-	}
+	@Autowired
+	private TicketService ticketService;
 	
 	@GetMapping
-	public ResponseEntity<List<ParkingDTO>> findAll(){
+	public ResponseEntity<List<Parking>> findAll(){
 		List<Parking> parkings = service.findAll();
-		List<ParkingDTO> result = parkingMapper.toParkingDTOMapper(parkings);
-		return ResponseEntity.ok(result);
+		return ResponseEntity.ok(parkings);
 	}
 	
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<ParkingDTO> findById(@PathVariable String id){
-		var dto = parkingMapper.parkingDTO(service.findById(id));
-		return ResponseEntity.ok(dto);
+	public ResponseEntity<Parking> findById(@PathVariable Long id){
+		var parking = service.findById(id);
+		return ResponseEntity.ok(parking);
 	}
 	
 	@PostMapping
-	public ResponseEntity<ParkingDTO> create(@RequestBody ParkingCreateDTO createDTO){
-		Parking newParking = parkingMapper.toParking(createDTO);
-		service.create(newParking);
-		var newParkingDTO = parkingMapper.parkingDTO(newParking);
-		return ResponseEntity.status(HttpStatus.CREATED).body(newParkingDTO);
+	public ResponseEntity<Parking> create(@RequestBody ParkingDTO dto){
+		var parking = service.create(dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(parking);
 	}
 	
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<Void> deleteById(@PathVariable String id){
+	public ResponseEntity<Void> deleteById(@PathVariable Long id){
 		service.deleteById(id);
 		return ResponseEntity.noContent().build();
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ParkingDTO> update(@PathVariable String id, @RequestBody ParkingCreateDTO createDTO){
+	public ResponseEntity<Parking> update(@PathVariable Long id, @RequestBody ParkingDTO dto){
+		return ResponseEntity.ok(service.update(id, dto));
+	}
+	
+	@PutMapping("/{id}/exit")
+	public ResponseEntity<TicketPayment> exit(@PathVariable Long id){
 		var parking = service.findById(id);
-		parking = parkingMapper.toParking(createDTO);
-		parking.setId(id);
-		service.update(parking);
-		var parkingDTO = parkingMapper.parkingDTO(parking);
-		return ResponseEntity.ok(parkingDTO);
+		parking.setExitDate(LocalDateTime.now());
+		TicketPayment ticket = ticketService.generate(parking);
+		parking.setTicket(ticket);
+		return ResponseEntity.ok(ticket);
 		
 	}
 }

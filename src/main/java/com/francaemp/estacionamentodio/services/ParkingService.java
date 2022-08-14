@@ -1,57 +1,54 @@
 package com.francaemp.estacionamentodio.services;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.francaemp.estacionamentodio.dto.ParkingCreateDTO;
+import com.francaemp.estacionamentodio.dto.ParkingDTO;
 import com.francaemp.estacionamentodio.entities.Parking;
-import com.francaemp.estacionamentodio.exception.ParkingNotFoundException;
+import com.francaemp.estacionamentodio.exception.ObjectNotFoundException;
+import com.francaemp.estacionamentodio.repositories.ParkingRepository;
 
 @Service
 public class ParkingService {
 
-	public static  Map<String,Parking> parkingsMap = new HashMap<>();
+	@Autowired
+	private ParkingRepository parkingRepository;
 	
-	static {
-		var id = getUUID();
-		Parking p1 = new Parking(id, "AAA-1111", "SC", "CORSA", "BRACO");
-		parkingsMap.put(id, p1);
-	}
 
 	public List<Parking> findAll(){
-		return parkingsMap.values().stream().toList();
+		return parkingRepository.findAll();
 	}
 	
-	private static String getUUID() {
-		 return UUID.randomUUID().toString().replace("-", "");
-	}
 
-	public Parking findById(String id) {
-		Parking parking = parkingsMap.get(id);
-		if(parking == null) {
-			throw new ParkingNotFoundException(id);
-		}
+	public Parking findById(Long id) {
+		var parking = parkingRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(id));
 		return parking;
 	}
 
-	public void create(Parking newParking) {
-		var id = getUUID();
-		newParking.setId(id);
-		newParking.setEntryDate(LocalDateTime.now());
-		parkingsMap.put(id, newParking);	
+	public Parking create(ParkingDTO obj) {
+		var parking = new Parking(obj);
+		parking.setEntryDate(LocalDateTime.now());
+		parkingRepository.save(parking);
+		return parking;
 	}
 
-	public void deleteById(String id) {
-		var parking = findById(id);
-		parkingsMap.remove(id);
+	public void deleteById(Long id) {
+		findById(id);
+		parkingRepository.deleteById(id);;
 	}
 
-	public Parking update(Parking parking) {	
-		return parkingsMap.put(parking.getId(), parking);
+	public Parking update(Long id, ParkingDTO dto) {
+		var parkingToUpdate = findById(id);
+		parkingToUpdate.setLicense(dto.getLicense());
+		parkingToUpdate.setModel(dto.getModel());
+		parkingToUpdate.setState(dto.getState());
+		parkingToUpdate.setColor(dto.getColor());
+		parkingRepository.save(parkingToUpdate);
+		return parkingToUpdate;
 	}
+
+	
 }

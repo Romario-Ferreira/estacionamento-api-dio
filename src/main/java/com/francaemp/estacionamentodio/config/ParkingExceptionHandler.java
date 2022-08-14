@@ -9,13 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.francaemp.estacionamentodio.exception.ParkingNotFoundException;
+import com.francaemp.estacionamentodio.exception.ObjectNotFoundException;
 
 @ControllerAdvice
 public class ParkingExceptionHandler{
 
-	@ExceptionHandler(ParkingNotFoundException.class)
-	public ResponseEntity<StandardError> parkingNotFound(ParkingNotFoundException e, HttpServletRequest request){
+	@ExceptionHandler(ObjectNotFoundException.class)
+	public ResponseEntity<StandardError> parkingNotFound(ObjectNotFoundException e, HttpServletRequest request){
 		StandardError err = new StandardError(Instant.now(), HttpStatus.NOT_FOUND.value(), e.getMessage(), request.getRequestURI());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
 	}
