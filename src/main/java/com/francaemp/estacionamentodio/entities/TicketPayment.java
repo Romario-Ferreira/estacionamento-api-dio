@@ -59,8 +59,11 @@ public class TicketPayment implements Serializable{
 		long hours =  Math.round(minutes / (double)60);
 		long days =  Math.round(hours/(double)24);
 		long month = Math.round(days/(double) 30);
-		
-		if (hours >= 0 && hours <12) {
+		if(hours == 0){
+			hours = 1;
+			payment = new StrategyHour();
+			this.total= payment.total(hours);
+		}else if (hours > 0 && hours <12) {
 			payment = new StrategyHour();
 			this.total= payment.total(hours);
 		}else if (hours >=12 && days < 15) {

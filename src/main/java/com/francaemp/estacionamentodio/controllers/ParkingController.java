@@ -43,7 +43,7 @@ public class ParkingController {
 		return ResponseEntity.ok(parking);
 	}
 	
-	@PostMapping
+	@PostMapping(value = "/save")
 	public ResponseEntity<Parking> create(@RequestBody ParkingDTO dto){
 		var parking = service.create(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(parking);
@@ -67,6 +67,5 @@ public class ParkingController {
 		TicketPayment ticket = ticketService.generate(parking);
 		parking.setTicket(ticket);
 		return ResponseEntity.ok(ticket);
-		
 	}
 }
